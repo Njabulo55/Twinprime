@@ -31,6 +31,7 @@ structure State where
   time : Nat
 
 -- 2. DYNAMICS AND PREDICTIVE CODING
+-- Distribution over observations used by presaccadic prediction and expectation.
 axiom Distribution : Type
 axiom PresaccadicPrior : State → Fixation → Distribution
 axiom UpdateBelief : SceneBelief → Observation → SceneBelief
@@ -53,6 +54,8 @@ def Objective (s : State) (a : Fixation) : R :=
 
 -- 4. TRACTABLE APPROXIMATION (ONE-STEP LOOKAHEAD)
 axiom ArgMax : (Fixation → R) → Fixation
+-- ArgMax returns a maximizer when one exists, with a deterministic tie-break.
+axiom ArgMax_Attains (f : Fixation → R) : ∀ b, le (f b) (f (ArgMax f))
 
 def OneStepLookaheadPolicy (s : State) : Fixation :=
   ArgMax (fun a => Objective s a)
@@ -75,9 +78,17 @@ def SaliencyDriven (s : State) : Prop :=
 def NeutralDriven (s : State) : Prop :=
   IntentSaliencyGap s = zero
 
+-- Partition axiom: every state is classified by exactly one criterion.
+axiom IntentSaliencyPartition (s : State) :
+  (IntentDriven s ∨ SaliencyDriven s ∨ NeutralDriven s) ∧
+  ¬ (IntentDriven s ∧ SaliencyDriven s) ∧
+  ¬ (IntentDriven s ∧ NeutralDriven s) ∧
+  ¬ (SaliencyDriven s ∧ NeutralDriven s)
+
 -- 6. EXPERIMENT PROTOCOL (KAGGLE-FRIENDLY)
 structure Dataset where
   name : String
+  -- Number of sequences (episodes) used for evaluation.
   sequences : Nat
 
 structure ExperimentConfig where
