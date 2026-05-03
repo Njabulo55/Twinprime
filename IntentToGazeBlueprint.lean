@@ -31,9 +31,9 @@ structure State where
   time : Nat
 
 -- 2. DYNAMICS AND PREDICTIVE CODING
--- Distribution over observations used by pre-saccadic prediction and expectation.
+-- Distribution over observations used by presaccadic prediction and expectation.
 axiom Distribution : Type
-axiom PreSaccadicPrior : State → Fixation → Distribution
+axiom PresaccadicPrior : State → Fixation → Distribution
 axiom UpdateBelief : SceneBelief → Observation → SceneBelief
 axiom UpdateIntent : Intent → Observation → Intent
 axiom Observe : State → Fixation → Observation
@@ -50,11 +50,11 @@ def StepUtility (s : State) (a : Fixation) (o : Observation) : R :=
 axiom Expectation : Distribution → (Observation → R) → R
 
 def Objective (s : State) (a : Fixation) : R :=
-  Expectation (PreSaccadicPrior s a) (fun o => StepUtility s a o)
+  Expectation (PresaccadicPrior s a) (fun o => StepUtility s a o)
 
 -- 4. TRACTABLE APPROXIMATION (ONE-STEP LOOKAHEAD)
 axiom ArgMax : (Fixation → R) → Fixation
--- ArgMax returns a maximizer when one exists, with a deterministic tie-break.
+-- ArgMax is assumed to be well-defined and returns a maximizer with a deterministic tie-break.
 axiom ArgMax_Attains (f : Fixation → R) : ∀ b, le (f b) (f (ArgMax f))
 
 def OneStepLookaheadPolicy (s : State) : Fixation :=
@@ -94,8 +94,8 @@ structure Dataset where
 
 structure ExperimentConfig where
   dataset : Dataset
-  -- Compute budget per episode (e.g., max fixations or model steps).
-  compute_budget : Nat
+  -- Maximum number of fixations per episode.
+  max_fixations : Nat
   -- Planning horizon in timesteps for each episode.
   horizon : Nat
   policy : State → Fixation
