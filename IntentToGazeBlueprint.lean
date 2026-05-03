@@ -31,7 +31,8 @@ structure State where
   time : Nat
 
 -- 2. DYNAMICS AND PREDICTIVE CODING
-axiom PresaccadicPrior : State → Fixation → Observation → R
+axiom Distribution : Type
+axiom PresaccadicPrior : State → Fixation → Distribution
 axiom UpdateBelief : SceneBelief → Observation → SceneBelief
 axiom UpdateIntent : Intent → Observation → Intent
 axiom Observe : State → Fixation → Observation
@@ -45,7 +46,7 @@ def StepUtility (s : State) (a : Fixation) (o : Observation) : R :=
   sub (add (TaskReward s.intent (UpdateBelief s.belief o)) (InformationGain s.belief o))
       (SaccadeCost s.last_fixation a)
 
-axiom Expectation : (Observation → R) → (Observation → R) → R
+axiom Expectation : Distribution → (Observation → R) → R
 
 def Objective (s : State) (a : Fixation) : R :=
   Expectation (PresaccadicPrior s a) (fun o => StepUtility s a o)
@@ -72,7 +73,7 @@ def SaliencyDriven (s : State) : Prop :=
   lt (IntentSaliencyGap s) zero
 
 def NeutralDriven (s : State) : Prop :=
-  le zero (IntentSaliencyGap s) ∧ le (IntentSaliencyGap s) zero
+  IntentSaliencyGap s = zero
 
 -- 6. EXPERIMENT PROTOCOL (KAGGLE-FRIENDLY)
 structure Dataset where
