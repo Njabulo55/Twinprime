@@ -9,6 +9,7 @@ noncomputable section
 -- 1. CORE TYPES
 axiom R : Type
 axiom le : R → R → Prop
+axiom lt : R → R → Prop
 axiom add : R → R → R
 axiom sub : R → R → R
 axiom zero : R
@@ -65,10 +66,13 @@ def IntentSaliencyGap (s : State) : R :=
       (SaliencyScore (PeripheralFromState s) (OneStepLookaheadPolicy s))
 
 def IntentDriven (s : State) : Prop :=
-  le zero (IntentSaliencyGap s)
+  lt zero (IntentSaliencyGap s)
 
 def SaliencyDriven (s : State) : Prop :=
-  le (IntentSaliencyGap s) zero
+  lt (IntentSaliencyGap s) zero
+
+def NeutralDriven (s : State) : Prop :=
+  le zero (IntentSaliencyGap s) ∧ le (IntentSaliencyGap s) zero
 
 -- 6. EXPERIMENT PROTOCOL (KAGGLE-FRIENDLY)
 structure Dataset where
