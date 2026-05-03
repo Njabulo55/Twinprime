@@ -49,7 +49,8 @@ def StepUtility (s : State) (a : Fixation) (o : Observation) : R :=
   sub (add (TaskReward s.intent (UpdateBelief s.belief o)) (InformationGain s.belief o))
       (SaccadeCost s.last_fixation a)
 
--- Expected value of a statistic under a distribution (assumed well-defined).
+-- Expected value of a statistic under a distribution (assumed measurable/integrable).
+axiom Integrable : Distribution → (Observation → R) → Prop
 axiom Expectation : Distribution → (Observation → R) → R
 
 def Objective (s : State) (a : Fixation) : R :=
@@ -57,8 +58,9 @@ def Objective (s : State) (a : Fixation) : R :=
 
 -- 4. TRACTABLE APPROXIMATION (ONE-STEP LOOKAHEAD)
 axiom ArgMax : (Fixation → R) → Fixation
--- ArgMax is assumed to be well-defined and returns a maximizer with a fixed ordering tiebreak.
-axiom ArgMax_Attains (f : Fixation → R) : ∀ b, le (f b) (f (ArgMax f))
+-- ArgMax assumes the objective attains a maximum (e.g., finite domain or compactness).
+axiom ArgMax_Precondition (f : Fixation → R) : Prop
+axiom ArgMax_Attains (f : Fixation → R) : ArgMax_Precondition f → ∀ b, le (f b) (f (ArgMax f))
 
 def OneStepLookaheadPolicy (s : State) : Fixation :=
   ArgMax (fun a => Objective s a)
@@ -98,6 +100,8 @@ structure Dataset where
 
 structure ExperimentConfig where
   dataset : Dataset
+  -- Random seed for reproducible evaluation.
+  seed : Nat
   -- Maximum number of fixations per episode.
   max_fixations : Nat
   -- Planning horizon in timesteps for each episode.
@@ -112,7 +116,7 @@ structure Metrics where
   -- Task success score (higher is better).
   task_success : R
 
--- Applies the policy across the dataset and returns aggregate metrics (deterministic given fixed seeds).
+-- Applies the policy across the dataset and returns aggregate metrics (deterministic given the seed).
 axiom RunExperiment : ExperimentConfig → Metrics
 
 end IntentToGazeBlueprint
