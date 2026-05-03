@@ -36,6 +36,7 @@ structure State where
 axiom Distribution : Type
 axiom PresaccadicPrior : State → Fixation → Distribution
 axiom UpdateBelief : SceneBelief → Observation → SceneBelief
+-- Intent update hook; may be identity unless a task event changes intent.
 axiom UpdateIntent : Intent → Observation → Intent
 axiom Observe : State → Fixation → Observation
 
@@ -56,7 +57,7 @@ def Objective (s : State) (a : Fixation) : R :=
 
 -- 4. TRACTABLE APPROXIMATION (ONE-STEP LOOKAHEAD)
 axiom ArgMax : (Fixation → R) → Fixation
--- ArgMax is assumed to be well-defined and returns a maximizer with a fixed ordering tie-break.
+-- ArgMax is assumed to be well-defined and returns a maximizer with a fixed ordering tiebreak.
 axiom ArgMax_Attains (f : Fixation → R) : ∀ b, le (f b) (f (ArgMax f))
 
 def OneStepLookaheadPolicy (s : State) : Fixation :=
@@ -65,6 +66,7 @@ def OneStepLookaheadPolicy (s : State) : Fixation :=
 -- 5. INTENT- VS SALIENCY-DRIVEN CRITERIA
 axiom SaliencyScore : Peripheral → Fixation → R
 axiom IntentScore : Intent → Fixation → R
+-- Extracts peripheral summary from the belief state or cached observation.
 axiom PeripheralFromState : State → Peripheral
 
 def IntentSaliencyGap (s : State) : R :=
@@ -110,7 +112,7 @@ structure Metrics where
   -- Task success score (higher is better).
   task_success : R
 
--- Applies the policy across the dataset and returns aggregate metrics (assumed deterministic).
+-- Applies the policy across the dataset and returns aggregate metrics (deterministic given fixed seeds).
 axiom RunExperiment : ExperimentConfig → Metrics
 
 end IntentToGazeBlueprint
