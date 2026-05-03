@@ -31,7 +31,8 @@ structure State where
   time : Nat
 
 -- 2. DYNAMICS AND PREDICTIVE CODING
--- Distribution over observations used by presaccadic prediction and expectation.
+-- Probability distribution over observations (discrete or continuous).
+-- Used by presaccadic prediction and expectation.
 axiom Distribution : Type
 axiom PresaccadicPrior : State → Fixation → Distribution
 axiom UpdateBelief : SceneBelief → Observation → SceneBelief
@@ -47,6 +48,7 @@ def StepUtility (s : State) (a : Fixation) (o : Observation) : R :=
   sub (add (TaskReward s.intent (UpdateBelief s.belief o)) (InformationGain s.belief o))
       (SaccadeCost s.last_fixation a)
 
+-- Expected value of a statistic under a distribution (assumed well-defined).
 axiom Expectation : Distribution → (Observation → R) → R
 
 def Objective (s : State) (a : Fixation) : R :=
@@ -54,7 +56,7 @@ def Objective (s : State) (a : Fixation) : R :=
 
 -- 4. TRACTABLE APPROXIMATION (ONE-STEP LOOKAHEAD)
 axiom ArgMax : (Fixation → R) → Fixation
--- ArgMax is assumed to be well-defined and returns a maximizer with a deterministic tie-break.
+-- ArgMax is assumed to be well-defined and returns a maximizer with a fixed ordering tie-break.
 axiom ArgMax_Attains (f : Fixation → R) : ∀ b, le (f b) (f (ArgMax f))
 
 def OneStepLookaheadPolicy (s : State) : Fixation :=
@@ -108,6 +110,7 @@ structure Metrics where
   -- Task success score (higher is better).
   task_success : R
 
+-- Applies the policy across the dataset and returns aggregate metrics (assumed deterministic).
 axiom RunExperiment : ExperimentConfig → Metrics
 
 end IntentToGazeBlueprint
