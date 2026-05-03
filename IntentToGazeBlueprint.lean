@@ -31,9 +31,9 @@ structure State where
   time : Nat
 
 -- 2. DYNAMICS AND PREDICTIVE CODING
--- Distribution over observations used by presaccadic prediction and expectation.
+-- Distribution over observations used by pre-saccadic prediction and expectation.
 axiom Distribution : Type
-axiom PresaccadicPrior : State → Fixation → Distribution
+axiom PreSaccadicPrior : State → Fixation → Distribution
 axiom UpdateBelief : SceneBelief → Observation → SceneBelief
 axiom UpdateIntent : Intent → Observation → Intent
 axiom Observe : State → Fixation → Observation
@@ -50,7 +50,7 @@ def StepUtility (s : State) (a : Fixation) (o : Observation) : R :=
 axiom Expectation : Distribution → (Observation → R) → R
 
 def Objective (s : State) (a : Fixation) : R :=
-  Expectation (PresaccadicPrior s a) (fun o => StepUtility s a o)
+  Expectation (PreSaccadicPrior s a) (fun o => StepUtility s a o)
 
 -- 4. TRACTABLE APPROXIMATION (ONE-STEP LOOKAHEAD)
 axiom ArgMax : (Fixation → R) → Fixation
