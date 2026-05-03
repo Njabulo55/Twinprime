@@ -87,19 +87,25 @@ axiom IntentSaliencyPartition (s : State) :
 
 -- 6. EXPERIMENT PROTOCOL (KAGGLE-FRIENDLY)
 structure Dataset where
+  -- Dataset identifier (name, path, or registry key).
   name : String
   -- Number of sequences (episodes) used for evaluation.
   sequences : Nat
 
 structure ExperimentConfig where
   dataset : Dataset
+  -- Compute budget per episode (e.g., max fixations or model steps).
   compute_budget : Nat
+  -- Planning horizon in timesteps for each episode.
   horizon : Nat
   policy : State → Fixation
 
 structure Metrics where
+  -- Ratio or percent reduction vs. full-frame baseline.
   compute_reduction : R
+  -- Reaction-time improvement vs. baseline (positive is better).
   reaction_time_gain : R
+  -- Task success score (higher is better).
   task_success : R
 
 axiom RunExperiment : ExperimentConfig → Metrics
